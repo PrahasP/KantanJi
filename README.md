@@ -1,2 +1,2 @@
-# Snip-Translator
- A simple translation tool designed to make interacting with applications in other languages significantly more convenient
+# Kantan-Ji: The Kanji Simplifier
+This program aims to aid new Japanese learners with quick and easy ways to turn Kanji into Kana to be able to be read and understood.

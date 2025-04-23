@@ -77,8 +77,10 @@ class Snip(QWidget):
             # Perform OCR on the saved image file
             text = ocr.read_text_from_image(temp_file_path)
 
-            # Display the extracted text (optional, but not necessary since it will print to the console)
-            self.main.label.setText(f"Extracted Text: {text}")
+            # Display the extracted text with formatting (white color and larger font size)
+            self.main.label.setStyleSheet("color: white; font-size: 18px;")
+            self.main.label.setTextInteractionFlags(Qt.TextSelectableByMouse)  # Enable text selection
+            self.main.label.setText(f"{text}")
 
             # Delete the temporary snipped image file after processing
             if os.path.exists(temp_file_path):

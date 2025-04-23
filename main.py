@@ -21,7 +21,7 @@ class ScreenRegionSelector(QMainWindow):
         self.m_width = 400
         self.m_height = 500
 
-        self.setWindowTitle("Snip-Translator")
+        self.setWindowTitle("Kantan-ji: The Kanji Simplifier")
         self.setMinimumSize(self.m_width, self.m_height)
 
         frame = QFrame()
