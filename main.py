@@ -14,6 +14,8 @@ import keyboard  # For global key tracking
 import threading  # For background thread to handle global key events
 import time  # To use time.sleep()
 
+import webbrowser  # Import the webbrowser module
+
 class ScreenRegionSelector(QMainWindow):
 
     def __init__(self):
@@ -38,9 +40,14 @@ class ScreenRegionSelector(QMainWindow):
         self.btn_copy.clicked.connect(self.copy)
         self.btn_copy.setVisible(False)
 
+        self.btn_open_browser = QPushButton("Open in Browser")  # New button
+        self.btn_open_browser.clicked.connect(self.open_in_browser)
+        self.btn_open_browser.setVisible(False)  # Initially hidden
+
         lay.addWidget(self.label)
         lay.addWidget(self.btn_capture)
         lay.addWidget(self.btn_copy)
+        lay.addWidget(self.btn_open_browser)  # Add the new button to the layout
 
         self.setCentralWidget(frame)
 
@@ -88,6 +95,7 @@ class ScreenRegionSelector(QMainWindow):
         self.capturing = True  # Indicate that capture is active
 
         self.btn_copy.setVisible(True)
+        self.btn_open_browser.setVisible(True)  # Show the new button
 
     def copy(self):
         """Copy the extracted text to the clipboard"""
@@ -97,6 +105,18 @@ class ScreenRegionSelector(QMainWindow):
             print(f"Text copied to clipboard: {self.extracted_text}")
         else:
             print("No text to copy!")
+
+    def open_in_browser(self):
+        """Open the extracted text in a browser window"""
+        if self.extracted_text:
+            # Extract the original text from the formatted string
+            extracted_text = self.extracted_text.split("\n")[1]  # Extract the text between "Extracted Text:\n" and "\nSimplified Text:"
+            # Use the webbrowser module to open the text in Jisho.org
+            url = f"https://jisho.org/search/{extracted_text}"
+            webbrowser.open(url)
+            print(f"Text opened in browser: {extracted_text}")
+        else:
+            print("No text to open in browser!")
 
     def close_capture_window(self):
         """Hide the capture window when Esc is pressed"""
