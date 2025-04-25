@@ -89,6 +89,9 @@ class ScreenRegionSelector(QMainWindow):
             self.pressed_keys.discard(']')
 
     def capture(self):
+        # Minimize the main window
+        self.showMinimized()
+
         # Create and show the capture window
         self.capturer = Snip(self)
         self.capturer.show()
