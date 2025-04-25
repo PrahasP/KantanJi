@@ -22,6 +22,9 @@ def read_text_from_image(image_path):
         # Optionally filter by confidence if needed
         if confidence > 0.25:
             extracted_text += f"{text}\n"
+
+    # Clean the extracted text
+    extracted_text = extracted_text.replace("\n", " ").strip()
     
     simplified_text = kanji_simplifier.KanjiSimplifier.generate_furigana(extracted_text)
 
