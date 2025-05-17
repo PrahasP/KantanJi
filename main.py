@@ -13,8 +13,9 @@ from snipping import Snip
 import keyboard  # For global key tracking
 import threading  # For background thread to handle global key events
 import time  # To use time.sleep()
-
 import webbrowser  # Import the webbrowser module
+
+from openpyxl import Workbook, load_workbook  # Add this import
 
 class ScreenRegionSelector(QMainWindow):
 
@@ -40,14 +41,19 @@ class ScreenRegionSelector(QMainWindow):
         self.btn_copy.clicked.connect(self.copy)
         self.btn_copy.setVisible(False)
 
-        self.btn_open_browser = QPushButton("Open in Browser")  # New button
+        self.btn_open_browser = QPushButton("Open in Browser")
         self.btn_open_browser.clicked.connect(self.open_in_browser)
-        self.btn_open_browser.setVisible(False)  # Initially hidden
+        self.btn_open_browser.setVisible(False)
+
+        self.btn_add_flashcard = QPushButton("Add to Flashcard Spreadsheet")
+        self.btn_add_flashcard.clicked.connect(self.add_to_flashcard)
+        self.btn_add_flashcard.setVisible(False)
 
         lay.addWidget(self.label)
         lay.addWidget(self.btn_capture)
         lay.addWidget(self.btn_copy)
-        lay.addWidget(self.btn_open_browser)  # Add the new button to the layout
+        lay.addWidget(self.btn_open_browser)
+        lay.addWidget(self.btn_add_flashcard)
 
         self.setCentralWidget(frame)
 
@@ -70,74 +76,92 @@ class ScreenRegionSelector(QMainWindow):
         self.extracted_text = ""
 
     def global_key_press(self, event):
-        # Add the key to the set when pressed
         if event.name == '[':
             self.pressed_keys.add('[')
         elif event.name == ']':
             self.pressed_keys.add(']')
 
-        # If both "[" and "]" are pressed, activate the capture
         if '[' in self.pressed_keys and ']' in self.pressed_keys:
             QTimer.singleShot(0, self.capture)
-            self.pressed_keys.clear()  # Clear the set after triggering the capture
+            self.pressed_keys.clear()
 
     def global_key_release(self, event):
-        # Remove the key from the set when released
         if event.name == '[':
             self.pressed_keys.discard('[')
         elif event.name == ']':
             self.pressed_keys.discard(']')
 
     def capture(self):
-        # Minimize the main window
         self.showMinimized()
-
-        # Create and show the capture window
         self.capturer = Snip(self)
         self.capturer.show()
-        self.capturing = True  # Indicate that capture is active
+        self.capturing = True
 
         self.btn_copy.setVisible(True)
-        self.btn_open_browser.setVisible(True)  # Show the new button
+        self.btn_open_browser.setVisible(True)
+        self.btn_add_flashcard.setVisible(True)
 
     def copy(self):
-        """Copy the extracted text to the clipboard"""
         if self.extracted_text:
             clipboard = QApplication.clipboard()
-            clipboard.setText(self.extracted_text)  # Set the clipboard to the extracted text
+            clipboard.setText(self.extracted_text)
             print(f"Text copied to clipboard: {self.extracted_text}")
         else:
             print("No text to copy!")
 
     def open_in_browser(self):
-        """Open the extracted text in a browser window"""
         if self.extracted_text:
-            # Extract the original text from the formatted string
-            extracted_text = self.extracted_text.split("\n")[1]  # Extract the text between "Extracted Text:\n" and "\nSimplified Text:"
-            # Use the webbrowser module to open the text in Jisho.org
+            extracted_text = self.extracted_text.split("\n")[1]
             url = f"https://jisho.org/search/{extracted_text}"
             webbrowser.open(url)
             print(f"Text opened in browser: {extracted_text}")
         else:
             print("No text to open in browser!")
 
+    def add_to_flashcard(self):
+        """Add the extracted text and simplified text to a spreadsheet."""
+        if not self.extracted_text:
+            print("No text to add to flashcard!")
+            return
+
+        try:
+            lines = self.extracted_text.split("\n")
+            original = lines[1] if len(lines) > 1 else ""
+            simplified = lines[3] if len(lines) > 3 else ""
+        except Exception as e:
+            print(f"Error parsing text: {e}")
+            return
+
+        filename = "flashcards.xlsx"
+        try:
+            try:
+                wb = load_workbook(filename)
+                ws = wb.active
+            except FileNotFoundError:
+                wb = Workbook()
+                ws = wb.active
+                ws.append(["Original", "Simplified"])
+
+            ws.append([original, simplified])
+            wb.save(filename)
+            print(f"Added to flashcard spreadsheet: {original} | {simplified}")
+        except Exception as e:
+            print(f"Error writing to spreadsheet: {e}")
+
     def close_capture_window(self):
-        """Hide the capture window when Esc is pressed"""
         if self.capturer:
             self.capturer.hide()
-        self.capturing = False  # Reset the capturing flag
-        self.show()  # Show the main window again
+        self.capturing = False
+        self.show()
 
     def key_handler(self):
-        """Listen for the 'Esc' key globally in the background"""
         while self.app_is_running:
-            if keyboard.is_pressed("esc"):  # Check if 'Esc' key is pressed
+            if keyboard.is_pressed("esc"):
                 self.close_capture_window()
-            time.sleep(0.1)  # Use time.sleep() to prevent CPU overload
-
+            time.sleep(0.1)
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)    
+    app = QApplication(sys.argv)
     app.setStyleSheet("""
     QFrame {
         background-color: #3f3f3f;

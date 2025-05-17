@@ -16,3 +16,14 @@ pip install -r requirements.txt
 python main.py
 
 3. Now, you're ready to simplify some kanji!
+
+## Flashcard Spreasheet -> Anki
+
+The way I have the spreadsheet set up, the original kanji is in the first column 
+and the second column is the simplified kana. 
+
+With that, it's pretty easy to set up inside of Anki itself.
+
+If you don't know how to do that, this video is a good guide 
+
+https://www.youtube.com/watch?v=pYJh9yyMbPs <- TUTORIAL
